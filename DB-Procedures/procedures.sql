@@ -1,9 +1,9 @@
 -- ================================== 1. Insert Restaurant Procedure ==================================
 DELIMITER //
-	CREATE PROCEDURE insert_restaurant(
+	CREATE PROCEDURE RegistrarRestaurante(
 			-- Parameters
 			p_restaurant_id VARCHAR(100),
-			p_restaurant_direction VARCHAR(100),
+			p_restaurant_address VARCHAR(100),
 			p_restaurant_municipality VARCHAR(100),
 			p_restaurant_zone INT,
 			p_restaurant_phone INT,
@@ -25,16 +25,70 @@ DELIMITER //
 				SET MESSAGE_TEXT = 'The restaurant id already exists on the restaurant table';
 			ELSE
 				-- Insert a new restaurant
-				INSERT INTO restaurant (restaurant_id, restaurant_direction, restaurant_municipality, restaurant_zone, restaurant_phone, restaurant_staff, restaurant_parking, restaurant_manager)
-				VALUES (p_restaurant_id, p_restaurant_direction, p_restaurant_municipality, p_restaurant_zone, p_restaurant_phone, p_restaurant_staff, p_restaurant_parking, p_restaurant_manager);
+				INSERT INTO restaurant (restaurant_id, restaurant_address, restaurant_municipality, restaurant_zone, restaurant_phone, restaurant_staff, restaurant_parking, restaurant_manager)
+				VALUES (p_restaurant_id, p_restaurant_address, p_restaurant_municipality, p_restaurant_zone, p_restaurant_phone, p_restaurant_staff, p_restaurant_parking, p_restaurant_manager);
 			END IF;
 		END IF;
 	END;
 //
 DELIMITER ;
 
--- Delete the insert_restaurant procedure
-DROP PROCEDURE IF EXISTS insert_restaurant;
+-- Delete the RegistrarRestaurante procedure
+DROP PROCEDURE IF EXISTS RegistrarRestaurante;
+
+
+
+
+
+-- ================================== 2. Insert Employee Procedure ==================================
+DELIMITER //
+	CREATE PROCEDURE CrearEmpleado(
+		IN p_employee_name VARCHAR(50),
+		IN p_employee_surname VARCHAR(50),
+		IN p_employee_birthdate DATE(50),
+		IN p_employee_email VARCHAR(50),
+		IN p_employee_phone INT,
+		IN p_employee_address VARCHAR(100),
+		IN p_employee_dpi BIGINT,
+		IN p_employee_start_date DATE,
+		IN p_employee_job INT,
+		IN p_employee_restaurant INT
+		
+	)
+	BEGIN
+		-- Verify if employee dpi exists
+		IF NOT EXISTS (SELECT 1 FROM employee WHERE employee_dpi = p_employee_dpi) THEN
+			-- Validate email format
+			IF REGEXP_LIKE(p_employee_email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$') THEN
+				-- Verify if employee job exists
+				IF NOT EXISTS (SELECT 1 FROM job WHERE job_id = p_employee_job) THEN
+					SIGNAL SQLSTATE '45000' 
+					SET MESSAGE_TEXT = 'The employee job not exists!!';
+				ELSE
+					-- Verify if employee restaurant exists
+					IF NOT EXISTS (SELECT 1 FROM restaurant WHERE restaurand_id = p_employee_restaurant) THEN
+						SIGNAL SQLSTATE '45000' 
+						SET MESSAGE_TEXT = 'The employee restaurant not exists!!';
+					ELSE
+						-- Insert a new employee
+						INSERT INTO employee (employee_name, employee_surname, employee_birthdate, employee_email, employee_phone, employee_address, employee_dpi,employee_start_date,employee_job,employee_restaurant)
+						VALUES (p_employee_name, p_employee_surname, p_employee_birthdate, p_employee_email, p_employee_phone, p_employee_address, p_employee_dpi,p_employee_start_date,p_employee_job,p_employee_restaurant);
+					END IF;
+				END IF;
+			ELSE
+				SIGNAL SQLSTATE '45000' 
+				SET MESSAGE_TEXT = 'Invalid email format!!';
+			END IF;
+		ELSE
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The employee dpi already exists in the client table!!';
+		END IF;
+	END;
+//
+DELIMITER;
+
+-- Delete the CrearEmpleado procedure
+DROP PROCEDURE IF EXISTS CrearEmpleado;
 
 
 
@@ -42,7 +96,7 @@ DROP PROCEDURE IF EXISTS insert_restaurant;
 
 -- ================================== 3. Insert Job Procedure ==================================
 DELIMITER //
-	CREATE PROCEDURE insert_job(
+	CREATE PROCEDURE RegistrarPuesto(
 		IN parameter_name VARCHAR(50),
 		IN parameter_description VARCHAR(150),
 		IN parameter_salary DECIMAL(10,2)
@@ -61,8 +115,8 @@ DELIMITER //
 //
 DELIMITER ;
 
--- Delete the insert_job procedure
-DROP PROCEDURE IF EXISTS insert_job;
+-- Delete the RegistrarPuesto procedure
+DROP PROCEDURE IF EXISTS RegistrarPuesto;
 
 
 
@@ -70,7 +124,7 @@ DROP PROCEDURE IF EXISTS insert_job;
 
 -- ================================== 4. Insert Client Procedure ==================================
 DELIMITER //
-	CREATE PROCEDURE insert_client(
+	CREATE PROCEDURE RegistrarCliente(
 		IN p_client_dpi BIGINT,
 		IN p_client_name VARCHAR(50),
 		IN p_client_surname VARCHAR(50),
@@ -99,34 +153,34 @@ DELIMITER //
 //
 DELIMITER;
 
--- Delete the insert_client procedure
-DROP PROCEDURE IF EXISTS insert_client;
+-- Delete the RegistrarCliente procedure
+DROP PROCEDURE IF EXISTS RegistrarCliente;
 
 
 
 
 
--- ================================== 5. Insert Client Direction Procedure ==================================
+-- ================================== 5. Insert Client address Procedure ==================================
 DELIMITER //
-	CREATE PROCEDURE insert_client_direction(
-		IN p_client_direction_dpi BIGINT,
-		IN p_client_direction_direction VARCHAR(100),
-		IN p_client_direction_municipality VARCHAR(50),
-		IN p_client_direction_zone INT
+	CREATE PROCEDURE RegistrarDireccion(
+		IN p_client_address_dpi BIGINT,
+		IN p_client_address_address VARCHAR(100),
+		IN p_client_address_municipality VARCHAR(50),
+		IN p_client_address_zone INT
 	)
 	BEGIN
-		IF p_client_direction_zone <= 0  THEN
+		IF p_client_address_zone <= 0  THEN
 			SIGNAL SQLSTATE '45000'
 			SET MESSAGE_TEXT = 'The client address zone must be a positive integer!!';
 		ELSE
 			-- If client dpi not exists
-			IF NOT EXISTS (SELECT 1 FROM client WHERE client_dpi = p_client_direction_dpi) THEN
+			IF NOT EXISTS (SELECT 1 FROM client WHERE client_dpi = p_client_address_dpi) THEN
 				SIGNAL SQLSTATE '45000' 
 				SET MESSAGE_TEXT = 'The client dpi not exists in the client table!!';
 			ELSE
-				-- Insert a new client direction
-				INSERT INTO client_direction (client_dpi, direction, municipality, zone)
-					VALUES (p_client_direction_dpi,p_client_direction_direction,p_client_direction_municipality,p_client_direction_zone);
+				-- Insert a new client address
+				INSERT INTO client_address (client_dpi, address, municipality, zone)
+					VALUES (p_client_address_dpi,p_client_address_address,p_client_address_municipality,p_client_address_zone);
 				
 			END IF;
 		END IF;
@@ -134,8 +188,8 @@ DELIMITER //
 //
 DELIMITER;
 
--- Delete the insert_client_direction procedure
-DROP PROCEDURE IF EXISTS insert_client_direction;
+-- Delete the RegistrarDireccion procedure
+DROP PROCEDURE IF EXISTS RegistrarDireccion;
 
 
 
@@ -143,9 +197,9 @@ DROP PROCEDURE IF EXISTS insert_client_direction;
 
 -- ================================== 6. Create A New Order ==================================
 DELIMITER //
-	CREATE PROCEDURE create_new_order(
+	CREATE PROCEDURE CrearOrden(
 		IN p_order_dpi BIGINT,
-		IN p_order_direction_id INT,
+		IN p_order_address_id INT,
 		IN p_order_channel CHAR
 	)
 	BEGIN
@@ -156,29 +210,33 @@ DELIMITER //
 			SIGNAL SQLSTATE '45000' 
 			SET MESSAGE_TEXT = 'The client dpi not exists in the client table!!';
 		ELSE
-			-- If client direction not exists
-			IF NOT EXISTS (SELECT 1 FROM client_direction WHERE client_direction_id = p_order_direction_id) THEN
+			-- If client address not exists
+			IF NOT EXISTS (SELECT 1 FROM client_address WHERE client_address_id = p_order_address_id) THEN
 				SIGNAL SQLSTATE '45000' 
-				SET MESSAGE_TEXT = 'The client direction not exists in the client_direction table!!';
+				SET MESSAGE_TEXT = 'The client address not exists in the client_address table!!';
 			ELSE
 				IF LENGTH(p_order_channel) <> 1 
 				OR (UPPER(SUBSTRING(p_order_channel, 1, 1)) <> 'L' AND UPPER(SUBSTRING(p_order_channel, 1, 1)) <> 'A') THEN
 					SIGNAL SQLSTATE '45000'
 					SET MESSAGE_TEXT = 'The order channel must be single character strings of specific values (L/A) !!';
 				ELSE
-					-- function to verify client direction coverage
-					SET v_result = check_client_direction_coverage(p_order_direction_id);
+					-- function to verify client address coverage
+					SET v_result = check_client_address_coverage(p_order_address_id);
 					-- If the address does not apply in the registered coverage of restaurants
 					IF v_result = FALSE THEN
+						-- Insert a new order with "Sin Cobertura" status
+						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
+						order__client_address,order__channel,order__restaurant_id,order__employee_id)
+						VALUES (NOW(),NULL,'SIN COBERTURA',-1,p_order_dpi,p_order_address_id,p_order_channel,NULL,NULL);
 						SIGNAL SQLSTATE '45000'
-						SET MESSAGE_TEXT = 'The client direction does not have coverage for the order!!';
+						SET MESSAGE_TEXT = 'The client address does not have coverage for the order!!';
 					ELSE
-						-- function to verify client direction coverage
-						SET restaurand_id = return_coverage_restaurant_id(p_order_direction_id);
+						-- function to verify client address coverage
+						SET restaurand_id = return_coverage_restaurant_id(p_order_address_id);
 						-- Insert a new order
-						INSERT INTO order_r (order_r_start_date, order_r_end_date, order_r_status, order_r_client_dpi,
-						order_r_client_direction,order_r_channel,order_r_restaurant_id,order_r_employee_id)
-						VALUES (NOW(),NULL,'INICIADA',p_order_dpi,p_order_direction_id,p_order_channel,restaurand_id,NULL);
+						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
+						order__client_address,order__channel,order__restaurant_id,order__employee_id)
+						VALUES (NOW(),NULL,'INICIADA',1,p_order_dpi,p_order_address_id,p_order_channel,restaurand_id,NULL);
 					END IF;
 				END IF;
 			END IF;
@@ -187,8 +245,8 @@ DELIMITER //
 //
 DELIMITER;
 
--- Delete the create_new_order procedure
-DROP PROCEDURE IF EXISTS create_new_order;
+-- Delete the CrearOrden procedure
+DROP PROCEDURE IF EXISTS CrearOrden;
 
 
 

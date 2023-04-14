@@ -1,7 +1,7 @@
 -- Function to verify if exists a restaurant with coverage area
 DELIMITER //
-  CREATE FUNCTION check_client_direction_coverage(
-    p_client_direction_id INT
+  CREATE FUNCTION check_client_address_coverage(
+    p_client_address_id INT
   )
   RETURNS BOOLEAN
   READS SQL DATA
@@ -9,10 +9,10 @@ DELIMITER //
   DECLARE v_municipality VARCHAR(50);
   DECLARE v_zone INT;
 
-	-- Obtaint "municipality" and "zone" of the client_direction_id
+	-- Obtaint "municipality" and "zone" of the client_address_id
 	SELECT municipality, zone INTO v_municipality, v_zone
-	FROM client_direction
-	WHERE client_direction_id = p_client_direction_id;
+	FROM client_address
+	WHERE client_address_id = p_client_address_id;
 
 	-- Verify a restaurant "municipality" and "zone" match
 	IF EXISTS (
@@ -35,7 +35,7 @@ DELIMITER ;
 -- Function to return the id of the restaurant who has coverage area
 DELIMITER //
   CREATE FUNCTION return_coverage_restaurant_id(
-    p_client_direction_id INT
+    p_client_address_id INT
   )
   -- Varchar return
   RETURNS VARCHAR(100) 
@@ -45,10 +45,10 @@ DELIMITER //
   DECLARE v_zone INT;
   DECLARE v_restaurant_id VARCHAR(100); 
     
-  -- Obtaint "municipality" and "zone" of the client_direction_id
+  -- Obtaint "municipality" and "zone" of the client_address_id
   SELECT municipality, zone INTO v_municipality, v_zone
-  FROM client_direction
-  WHERE client_direction_id = p_client_direction_id;
+  FROM client_address
+  WHERE client_address_id = p_client_address_id;
 
   -- Verify a restaurant "municipality" and "zone" match
   SELECT restaurant_id INTO v_restaurant_id
