@@ -85,7 +85,7 @@ DELIMITER //
 			-- Validate email format
 			IF REGEXP_LIKE(p_client_email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$') THEN
 				-- Insert a new client
-				INSERT INTO client (client_dpi, name, surname, birthdate, email, phone, NIT)
+				INSERT INTO client (client_dpi, name, surname, birthdate, email, phone, nit)
 				VALUES (p_client_dpi, p_client_name, p_client_surname, p_client_birthdate, p_client_email, p_client_phone, p_client_nit);
 			ELSE
 				SIGNAL SQLSTATE '45000' 
@@ -138,6 +138,57 @@ DELIMITER;
 DROP PROCEDURE IF EXISTS insert_client_direction;
 
 
+
+
+
+-- ================================== 6. Create A New Order ==================================
+DELIMITER //
+	CREATE PROCEDURE create_new_order(
+		IN p_order_dpi BIGINT,
+		IN p_order_direction_id INT,
+		IN p_order_channel CHAR
+	)
+	BEGIN
+		DECLARE v_result BOOLEAN;
+		DECLARE restaurand_id VARCHAR(100);
+		-- If client dpi not exists
+		IF NOT EXISTS (SELECT 1 FROM client WHERE client_dpi = p_order_dpi) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The client dpi not exists in the client table!!';
+		ELSE
+			-- If client direction not exists
+			IF NOT EXISTS (SELECT 1 FROM client_direction WHERE client_direction_id = p_order_direction_id) THEN
+				SIGNAL SQLSTATE '45000' 
+				SET MESSAGE_TEXT = 'The client direction not exists in the client_direction table!!';
+			ELSE
+				IF LENGTH(p_order_channel) <> 1 
+				OR (UPPER(SUBSTRING(p_order_channel, 1, 1)) <> 'L' AND UPPER(SUBSTRING(p_order_channel, 1, 1)) <> 'A') THEN
+					SIGNAL SQLSTATE '45000'
+					SET MESSAGE_TEXT = 'The order channel must be single character strings of specific values (L/A) !!';
+				ELSE
+					-- function to verify client direction coverage
+					SET v_result = check_client_direction_coverage(p_order_direction_id);
+					-- If the address does not apply in the registered coverage of restaurants
+					IF v_result = FALSE THEN
+						SIGNAL SQLSTATE '45000'
+						SET MESSAGE_TEXT = 'The client direction does not have coverage for the order!!';
+					ELSE
+						-- function to verify client direction coverage
+						SET restaurand_id = return_coverage_restaurant_id(p_order_direction_id);
+						-- Insert a new order
+						INSERT INTO order_r (order_r_start_date, order_r_end_date, order_r_status, order_r_client_dpi,
+						order_r_client_direction,order_r_channel,order_r_restaurant_id,order_r_employee_id)
+						VALUES (NOW(),NULL,'INICIADA',p_order_dpi,p_order_direction_id,p_order_channel,restaurand_id,NULL);
+					END IF;
+				END IF;
+			END IF;
+		END IF;
+	END;
+//
+DELIMITER;
+
+-- Delete the create_new_order procedure
+DROP PROCEDURE IF EXISTS create_new_order;
 
 
 

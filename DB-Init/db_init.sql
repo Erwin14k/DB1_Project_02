@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS client(
         birthdate DATE NOT NULL,
         email VARCHAR(50) NOT NULL,
         phone INT NOT NULL,
-        NIT INT
+        nit INT
 );
 
 -- Client_Direction table
@@ -119,14 +119,14 @@ CREATE TABLE IF NOT EXISTS product(
 -- Order table
 CREATE TABLE IF NOT EXISTS order_r(
 	order_r_id INT PRIMARY KEY AUTO_INCREMENT,
-        order_r_start_date DATE NOT NULL,
-        order_r_end_date DATE NOT NULL,
+        order_r_start_date DATETIME NOT NULL,
+        order_r_end_date DATETIME ,
         order_r_status VARCHAR(50) NOT NULL,
         order_r_client_dpi BIGINT NOT NULL,
         order_r_client_direction VARCHAR(100) NOT NULL,
         order_r_channel CHAR NOT NULL,
         order_r_restaurant_id VARCHAR(100)  NOT NULL,
-        order_r_employee_id BIGINT  NOT NULL,
+        order_r_employee_id BIGINT ,
         FOREIGN KEY (order_r_client_dpi) REFERENCES client(client_dpi) ON DELETE CASCADE,
         FOREIGN KEY (order_r_restaurant_id) REFERENCES restaurant(restaurant_id) ON DELETE CASCADE,
         FOREIGN KEY (order_r_employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
