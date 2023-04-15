@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS order_(
   order__channel CHAR NOT NULL,
   order__restaurant_id VARCHAR(100),
   order__employee_id BIGINT ,
+  order__payment_method CHAR,
   FOREIGN KEY (order__client_dpi) REFERENCES client(client_dpi) ON DELETE CASCADE,
   FOREIGN KEY (order__restaurant_id) REFERENCES restaurant(restaurant_id) ON DELETE CASCADE,
   FOREIGN KEY (order__employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
@@ -143,4 +144,17 @@ CREATE TABLE IF NOT EXISTS order_product(
   oder_product_observation VARCHAR(100) NOT NULL,
   order_product_orderid INT NOT NULL,
   FOREIGN KEY (order_product_orderid) REFERENCES order_(order__id) ON DELETE CASCADE
+);
+
+
+-- Bill table
+CREATE TABLE IF NOT EXISTS bill(
+  bill_serial_number VARCHAR(50),
+  bill_total DECIMAL(10,2) NOT NULL,
+  bill_place VARCHAR(100) NOT NULL,
+  bill_date_time DATETIME NOT NULL,
+  bill_order_id INT NOT NULL,
+  bill_client_nit VARCHAR(50) NOT NULL,
+  bill_payment_method CHAR,
+  FOREIGN KEY (bill_order_id) REFERENCES order_(order__id) ON DELETE CASCADE
 );

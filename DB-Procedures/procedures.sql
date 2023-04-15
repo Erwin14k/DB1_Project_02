@@ -195,7 +195,7 @@ DROP PROCEDURE IF EXISTS RegistrarDireccion;
 
 
 
--- ================================== 6. Create A New Order ==================================
+-- ================================== 6. Create A New Order Procedure ==================================
 DELIMITER //
 	CREATE PROCEDURE CrearOrden(
 		IN p_order_dpi BIGINT,
@@ -226,8 +226,8 @@ DELIMITER //
 					IF v_result = FALSE THEN
 						-- Insert a new order with "Sin Cobertura" status
 						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
-						order__client_address,order__channel,order__restaurant_id,order__employee_id)
-						VALUES (NOW(),NULL,'SIN COBERTURA',-1,p_order_dpi,p_order_address_id,p_order_channel,NULL,NULL);
+						order__client_address,order__channel,order__restaurant_id,order__employee_id,order__payment_method)
+						VALUES (NOW(),NULL,'SIN COBERTURA',-1,p_order_dpi,p_order_address_id,p_order_channel,NULL,NULL,NULL);
 						SIGNAL SQLSTATE '45000'
 						SET MESSAGE_TEXT = 'The client address does not have coverage for the order!!';
 					ELSE
@@ -235,8 +235,8 @@ DELIMITER //
 						SET restaurand_id = return_coverage_restaurant_id(p_order_address_id);
 						-- Insert a new order
 						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
-						order__client_address,order__channel,order__restaurant_id,order__employee_id)
-						VALUES (NOW(),NULL,'INICIADA',1,p_order_dpi,p_order_address_id,p_order_channel,restaurand_id,NULL);
+						order__client_address,order__channel,order__restaurant_id,order__employee_id,order__payment_method)
+						VALUES (NOW(),NULL,'INICIADA',1,p_order_dpi,p_order_address_id,p_order_channel,restaurand_id,NULL,NULL);
 					END IF;
 				END IF;
 			END IF;
@@ -252,7 +252,7 @@ DROP PROCEDURE IF EXISTS CrearOrden;
 
 
 
--- ================================== 7. Add Item To A Order ==================================
+-- ================================== 7. Add Item To An Order  Procedure==================================
 DELIMITER //
 	CREATE PROCEDURE AgregarItem(
 		IN p_order_id BIGINT,
@@ -265,7 +265,7 @@ DELIMITER //
 		DECLARE v_result BOOLEAN;
 		DECLARE order_status VARCHAR(50);
 		-- If order id not exists
-		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int != -1) THEN
+		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int = 1) THEN
 			SIGNAL SQLSTATE '45000' 
 			SET MESSAGE_TEXT = 'The order id does not exist, or has a status of non-coverage.!!';
 		ELSE
@@ -313,7 +313,68 @@ DROP PROCEDURE IF EXISTS AgregarItem;
 
 
 
+-- ================================== 8. Confirm  Order Procedure ==================================
+DELIMITER //
+	CREATE PROCEDURE ConfirmarOrden(
+		IN p_order_id BIGINT,
+		IN p_payment_method CHAR,
+		IN p_employee_id INT
+	)
+	BEGIN
+		-- If order id not exists
+		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int = 2) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The order id does not exist, or has a invalid status!!';
+		ELSE
+			-- Verify employee id existence
+			IF NOT EXISTS (SELECT 1 FROM employee WHERE employee_id = p_employee_id ) THEN
+				SIGNAL SQLSTATE '45000' 
+				SET MESSAGE_TEXT = 'The employee id does not exist!!';
+			ELSE
+				-- Verify a correct payment method
+				IF LENGTH(p_payment_method) <> 1 
+				OR (UPPER(SUBSTRING(p_payment_method, 1, 1)) <> 'E' AND UPPER(SUBSTRING(p_payment_method, 1, 1)) <> 'T') THEN
+					SIGNAL SQLSTATE '45000'
+					SET MESSAGE_TEXT = 'The payment method must be single character strings of specific values (E/T) !!';
+				ELSE
+					--Update the order status
+					CALL update_order_status(p_order_id,'EN CAMINO',3);
+					-- Update order employee and payment method
+					CALL update_order_employee(p_order_id,p_employee_id,p_payment_method);
+					-- Insert a new Bill
+				END IF;
+			END IF;
+		END IF;
+	END;
+//
+DELIMITER;
+
+-- Delete the ConfirmarOrden procedure
+DROP PROCEDURE IF EXISTS ConfirmarOrden;
 
 
 
 
+
+-- ================================== 9. Finish  Order Procedure ==================================
+DELIMITER //
+	CREATE PROCEDURE FinalizarOrden(
+		IN p_order_id BIGINT
+	)
+	BEGIN
+		-- If order id not exists
+		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int = 3) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The order id does not exist, or has a invalid status!!';
+		ELSE
+			-- Update the end date Order
+			CALL update_order_end_date (p_order_id);
+			-- Update the order status
+			CALL update_order_status(p_order_id,'ENTREGADA',4);
+		END IF;
+	END;
+//
+DELIMITER;
+
+-- Delete the FinalizarOrden procedure
+DROP PROCEDURE IF EXISTS FinalizarOrden;
