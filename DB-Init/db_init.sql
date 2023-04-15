@@ -141,8 +141,6 @@ CREATE TABLE IF NOT EXISTS order_product(
   order_product_pnumber INT NOT NULL,
   order_product_ammount INT NOT NULL,
   oder_product_observation VARCHAR(100) NOT NULL,
-  order_product_pid INT NOT NULL,
   order_product_orderid INT NOT NULL,
-  FOREIGN KEY (order_product_pid) REFERENCES product(product_id) ON DELETE CASCADE,
   FOREIGN KEY (order_product_orderid) REFERENCES order_(order__id) ON DELETE CASCADE
 );

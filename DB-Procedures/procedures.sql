@@ -231,7 +231,7 @@ DELIMITER //
 						SIGNAL SQLSTATE '45000'
 						SET MESSAGE_TEXT = 'The client address does not have coverage for the order!!';
 					ELSE
-						-- function to verify client address coverage
+						-- function to return the coverage restaurant id
 						SET restaurand_id = return_coverage_restaurant_id(p_order_address_id);
 						-- Insert a new order
 						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
@@ -247,6 +247,73 @@ DELIMITER;
 
 -- Delete the CrearOrden procedure
 DROP PROCEDURE IF EXISTS CrearOrden;
+
+
+
+
+
+-- ================================== 7. Add Item To A Order ==================================
+DELIMITER //
+	CREATE PROCEDURE AgregarItem(
+		IN p_order_id BIGINT,
+		IN p_product_type CHAR,
+		IN p_product_number INT,
+		IN p_ammount INT,
+		IN p_observation VARCHAR(100)
+	)
+	BEGIN
+		DECLARE v_result BOOLEAN;
+		DECLARE order_status VARCHAR(50);
+		-- If order id not exists
+		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int != -1) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The order id does not exist, or has a status of non-coverage.!!';
+		ELSE
+			-- Verify a positive number in amount parameter
+			IF p_ammount <= 0  THEN
+				SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'The product ammount must be a positive integer!!';
+			ELSE
+				-- Verify a correct product type
+				IF LENGTH(p_product_type) <> 1 
+				OR (UPPER(SUBSTRING(p_product_type, 1, 1)) <> 'C' AND UPPER(SUBSTRING(p_product_type, 1, 1)) <> 'E'
+				AND UPPER(SUBSTRING(p_product_type, 1, 1)) <> 'B' AND UPPER(SUBSTRING(p_product_type, 1, 1)) <> 'P') THEN
+					SIGNAL SQLSTATE '45000'
+					SET MESSAGE_TEXT = 'The product type must be single character strings of specific values (C/E/B/P) !!';
+				ELSE
+					-- function to verify a product existence
+					SET v_result = check_product_existence(p_product_type,p_product_number);
+					-- If the product not exists
+					IF v_result = FALSE THEN
+						SIGNAL SQLSTATE '45000'
+						SET MESSAGE_TEXT = 'The product not exists!!';
+					ELSE
+						-- function to return the order status
+						SET order_status = return_order_status(p_order_id);
+						IF order_status = 'INICIADA' THEN
+							--Update the order status
+							CALL update_order_status(p_order_id,'AGREGANDO',2);
+						END IF;
+						-- Insert a new order_product detail
+						INSERT INTO order_product (order_product_ptype, order_product_pnumber, order_product_ammount, oder_product_observation,
+						order_product_orderid)
+						VALUES (p_product_type,p_product_number,p_ammount,p_observation,p_order_id);
+					END IF;
+				END IF;
+			END IF;
+		END IF;
+	END;
+//
+DELIMITER;
+
+-- Delete the AgregarItem procedure
+DROP PROCEDURE IF EXISTS AgregarItem;
+
+
+
+
+
+
 
 
 

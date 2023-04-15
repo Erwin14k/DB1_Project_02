@@ -65,3 +65,55 @@ DELIMITER //
   END IF;
 END//
 DELIMITER ;
+
+
+
+
+
+-- Function to verify if exists a product 
+DELIMITER //
+  CREATE FUNCTION check_product_existence(
+    p_product_type CHAR,
+    p_product_number INT
+  )
+  RETURNS BOOLEAN
+  READS SQL DATA
+  BEGIN
+	-- Verify a restaurant "municipality" and "zone" match
+	IF EXISTS (
+		SELECT 1
+		FROM product
+		WHERE order_product_ptype = p_product_type
+		AND order_product_pnumber = p_product_number
+	) THEN
+		RETURN TRUE;
+	ELSE
+		RETURN FALSE;
+	END IF;
+END//
+DELIMITER ;
+
+
+
+
+-- Function to return the order status
+DELIMITER //
+  CREATE FUNCTION return_order_status(
+    p_order_id INT
+  )
+  -- Varchar return
+  RETURNS VARCHAR(100) 
+  READS SQL DATA
+  BEGIN
+  DECLARE v_order_status VARCHAR(100); 
+    
+
+  -- found the order
+  SELECT order__status INTO v_order_status
+  FROM order_
+  WHERE order__id = p_order_id;
+
+  -- Return the order status
+  RETURN v_order_status;
+END//
+DELIMITER ;
