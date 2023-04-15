@@ -23,6 +23,7 @@ TRUNCATE TABLE product;
 TRUNCATE TABLE job;
 TRUNCATE TABLE client;
 TRUNCATE TABLE client_address;
+TRUNCATE TABLE bill;
 
 -- Drop Tables
 DROP TABLE restaurant ;
@@ -33,6 +34,7 @@ DROP TABLE product;
 DROP TABLE job;
 DROP TABLE client;
 DROP TABLE client_address;
+DROP TABLE bill;
 
 -- Select * From Tables
 SELECT * FROM  restaurant ;
@@ -43,6 +45,7 @@ SELECT * FROM  product;
 SELECT * FROM  job;
 SELECT * FROM client;
 SELECT * FROM  client_address;
+SELECT * FROM  bill;
 
 
 
@@ -141,15 +144,16 @@ CREATE TABLE IF NOT EXISTS order_product(
   order_product_ptype CHAR NOT NULL,
   order_product_pnumber INT NOT NULL,
   order_product_ammount INT NOT NULL,
-  oder_product_observation VARCHAR(100) NOT NULL,
+  order_product_observation VARCHAR(100) NOT NULL,
   order_product_orderid INT NOT NULL,
+  order_product_price DECIMAL (10,2)NOT NULL,
   FOREIGN KEY (order_product_orderid) REFERENCES order_(order__id) ON DELETE CASCADE
 );
 
 
 -- Bill table
 CREATE TABLE IF NOT EXISTS bill(
-  bill_serial_number VARCHAR(50),
+  bill_serial_number VARCHAR(50) PRIMARY KEY,
   bill_total DECIMAL(10,2) NOT NULL,
   bill_place VARCHAR(100) NOT NULL,
   bill_date_time DATETIME NOT NULL,

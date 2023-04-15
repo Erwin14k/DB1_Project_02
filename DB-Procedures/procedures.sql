@@ -264,6 +264,7 @@ DELIMITER //
 	BEGIN
 		DECLARE v_result BOOLEAN;
 		DECLARE order_status VARCHAR(50);
+		DECLARE product_price DECIMAL(10,2);
 		-- If order id not exists
 		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int = 1) THEN
 			SIGNAL SQLSTATE '45000' 
@@ -295,9 +296,10 @@ DELIMITER //
 							CALL update_order_status(p_order_id,'AGREGANDO',2);
 						END IF;
 						-- Insert a new order_product detail
-						INSERT INTO order_product (order_product_ptype, order_product_pnumber, order_product_ammount, oder_product_observation,
-						order_product_orderid)
-						VALUES (p_product_type,p_product_number,p_ammount,p_observation,p_order_id);
+						SET product_price =return_product_price(p_product_type,p_product_number);
+						INSERT INTO order_product (order_product_ptype, order_product_pnumber, order_product_ammount, order_product_observation,
+						order_product_orderid,order_product_price)
+						VALUES (p_product_type,p_product_number,p_ammount,p_observation,p_order_id,product_price);
 					END IF;
 				END IF;
 			END IF;
@@ -321,6 +323,11 @@ DELIMITER //
 		IN p_employee_id INT
 	)
 	BEGIN
+		DECLARE total_bill DECIMAL(10,2);
+		DECLARE payment_method CHAR;
+		DECLARE client_dpi BIGINT;
+		DECLARE client_nit VARCHAR(20);
+		DECLARE client_direction VARCHAR(100);
 		-- If order id not exists
 		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int = 2) THEN
 			SIGNAL SQLSTATE '45000' 
@@ -342,6 +349,14 @@ DELIMITER //
 					-- Update order employee and payment method
 					CALL update_order_employee(p_order_id,p_employee_id,p_payment_method);
 					-- Insert a new Bill
+					SET total_bill=calculate_order_total(p_order_id);
+					SET payment_method=return_order_payment_method(p_order_id);
+					SET client_dpi=return_order_client_dpi(p_order_id);
+					SET client_direction=return_order_client_address(p_order_id);
+					SET client_nit=return_client_nit(client_dpi);
+					INSERT INTO bill (bill_serial_number, bill_total, bill_place, bill_date_time,
+						bill_order_id,bill_client_nit,bill_payment_method)
+						VALUES (CONCAT(YEAR(NOW()),p_order_id),total_bill,client_direction,NOW(),p_order_id,client_nit,payment_method);
 				END IF;
 			END IF;
 		END IF;
