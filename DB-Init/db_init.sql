@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS client_address(
 
 -- Product table
 CREATE TABLE IF NOT EXISTS product(
-  product_id INT PRIMARY KEY AUTO_INCREMENT,
+  product_id VARCHAR(10) PRIMARY KEY,
   product_type CHAR NOT NULL,
   product_number INT NOT NULL,
   product_name VARCHAR(50) NOT NULL,
@@ -162,3 +162,24 @@ CREATE TABLE IF NOT EXISTS bill(
   bill_payment_method CHAR,
   FOREIGN KEY (bill_order_id) REFERENCES order_(order__id) ON DELETE CASCADE
 );
+
+
+INSERT INTO product (product_id,product_type, product_number, product_name, product_price) VALUES
+('C1', 'C', 1, 'Cheeseburger',41.00),
+('C2', 'C', 2, 'Chicken Sandwinch',32.00),
+('C3', 'C', 3, 'BBQ Ribs',54.00),
+('C4', 'C', 4, 'Pasta Alfredo',47.00),
+('C5', 'C', 5, 'Pizza Espinator',85.00),
+('C6', 'C', 6, 'Buffalo Wings',36.00),
+('E1', 'E', 1, 'Papas fritas',15.00),
+('E2', 'E', 2, 'Aros de cebolla',17.00),
+('E3', 'E', 3, 'Coleslaw',12.00),
+('B1', 'B', 1, 'Coca-Cola',12.00),
+('B2', 'B', 2, 'Fanta',12.00),
+('B3', 'B', 3, 'Sprite',12.00),
+('B4', 'B', 4, 'Té frío',12.00),
+('B5', 'B', 5, 'Cerveza de barril',18.00),
+('P1', 'P', 1, 'Copa de helado',13.00),
+('P2', 'P', 2, 'Cheesecake',15.00),
+('P3', 'P', 3, 'Cupcake de chocolate',8.00),
+('P4', 'P', 4, 'Flan',10.00);

@@ -211,7 +211,8 @@ DELIMITER //
 			SET MESSAGE_TEXT = 'The client dpi not exists in the client table!!';
 		ELSE
 			-- If client address not exists
-			IF NOT EXISTS (SELECT 1 FROM client_address WHERE client_address_id = p_order_address_id) THEN
+			IF NOT EXISTS (SELECT 1 FROM client_address WHERE client_address_id = p_order_address_id
+			AND client_dpi=p_order_dpi) THEN
 				SIGNAL SQLSTATE '45000' 
 				SET MESSAGE_TEXT = 'The client address not exists in the client_address table!!';
 			ELSE
