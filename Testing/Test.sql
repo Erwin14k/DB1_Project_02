@@ -1,12 +1,13 @@
 -- ########################### INGRESAR Restaurante ###########################
 CALL RegistrarRestaurante('R-01', 'Zona 10, Guatemala City','Guatemala',-10,12121212,10,1); -- Zona invalida
+CALL RegistrarRestaurante('R-01', 'Zona 10, Guatemala City','Guatemala',10,12121212,-10,1); -- personal invalido
 CALL RegistrarRestaurante('R-01', 'Zona 10, Guatemala City','Guatemala',10,12121212,10,1); -- ok
 CALL RegistrarRestaurante('R-01', 'Zona 10, Guatemala City','Guatemala',10,12121212,10,1); -- error duplicado
 
 
 
 -- ########################### INGRESAR Puesto De Trabajo ###########################
-CALL RegistrarPuesto('Gerente','Monitoreo del restaurante',-5000.00); --Salario Invalido
+CALL RegistrarPuesto('Gerente','Monitoreo del restaurante',-5000.00); -- Salario Invalido
 CALL RegistrarPuesto('Gerente','Monitoreo del restaurante',5000.00);  -- ok
 CALL RegistrarPuesto('Gerente','Monitoreo del restaurante',5000.00); -- Error repetido
 CALL RegistrarPuesto('Mesero','Servir la comida',3500.00); -- ok
@@ -63,6 +64,7 @@ CALL AgregarItem(1,'E',1,10,''); -- ok
 CALL AgregarItem(1,'B',1,10,''); -- ok
 CALL AgregarItem(1,'P',1,10,''); -- ok
 CALL AgregarItem(1,'P',19,10,''); -- Error, producto inexistente
+CALL AgregarItem(2,'P',19,10,''); -- Error, no se pueden agregar items a una orden sin cobertura
 CALL AgregarItem(2,'C',2,5,''); -- ok
 CALL AgregarItem(2,'E',2,5,''); -- ok
 CALL AgregarItem(2,'B',2,5,''); -- ok
@@ -72,9 +74,9 @@ CALL AgregarItem(2,'P',2,5,''); -- ok
 -- ########################### Confirmar ordenes ###########################
 CALL ConfirmarOrden(10,'E',3); -- Error,Orden inexistente
 CALL ConfirmarOrden(1,'E',13); -- Error, El trabajador no existe
-CALL ConfirmarOrden(1,'S',3); -- Error, Método de pago invalido
-CALL ConfirmarOrden(1,'E',3); -- ok
-CALL ConfirmarOrden(2,'T',3); -- ok
+CALL ConfirmarOrden(1,'S',2); -- Error, Método de pago invalido
+CALL ConfirmarOrden(1,'E',2); -- ok
+CALL ConfirmarOrden(3,'T',2); -- ok
 
 
 -- ########################### Finalizar Órdenes ###########################

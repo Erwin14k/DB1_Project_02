@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS order_(
   order__client_address VARCHAR(100) NOT NULL,
   order__channel CHAR NOT NULL,
   order__restaurant_id VARCHAR(100),
-  order__employee_id BIGINT ,
+  order__employee_id INT ,
   order__payment_method CHAR,
   FOREIGN KEY (order__client_dpi) REFERENCES client(client_dpi) ON DELETE CASCADE,
   FOREIGN KEY (order__restaurant_id) REFERENCES restaurant(restaurant_id) ON DELETE CASCADE,

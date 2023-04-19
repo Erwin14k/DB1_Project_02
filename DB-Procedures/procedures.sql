@@ -8,8 +8,7 @@ DELIMITER //
 			p_restaurant_zone INT,
 			p_restaurant_phone INT,
 			p_restaurant_staff INT,
-			p_restaurant_parking SMALLINT,
-			p_restaurant_manager INT
+			p_restaurant_parking SMALLINT
 	)
 	BEGIN
 		DECLARE restaurant_count INT; -- restaurant id match counter
@@ -25,8 +24,8 @@ DELIMITER //
 				SET MESSAGE_TEXT = 'The restaurant id already exists on the restaurant table';
 			ELSE
 				-- Insert a new restaurant
-				INSERT INTO restaurant (restaurant_id, restaurant_address, restaurant_municipality, restaurant_zone, restaurant_phone, restaurant_staff, restaurant_parking, restaurant_manager)
-				VALUES (p_restaurant_id, p_restaurant_address, p_restaurant_municipality, p_restaurant_zone, p_restaurant_phone, p_restaurant_staff, p_restaurant_parking, p_restaurant_manager);
+				INSERT INTO restaurant (restaurant_id, restaurant_address, restaurant_municipality, restaurant_zone, restaurant_phone, restaurant_staff, restaurant_parking)
+				VALUES (p_restaurant_id, p_restaurant_address, p_restaurant_municipality, p_restaurant_zone, p_restaurant_phone, p_restaurant_staff, p_restaurant_parking);
 			END IF;
 		END IF;
 	END;
@@ -45,14 +44,14 @@ DELIMITER //
 	CREATE PROCEDURE CrearEmpleado(
 		IN p_employee_name VARCHAR(50),
 		IN p_employee_surname VARCHAR(50),
-		IN p_employee_birthdate DATE(50),
+		IN p_employee_birthdate DATE,
 		IN p_employee_email VARCHAR(50),
 		IN p_employee_phone INT,
 		IN p_employee_address VARCHAR(100),
 		IN p_employee_dpi BIGINT,
 		IN p_employee_start_date DATE,
 		IN p_employee_job INT,
-		IN p_employee_restaurant INT
+		IN p_employee_restaurant VARCHAR(100)
 		
 	)
 	BEGIN
@@ -66,7 +65,7 @@ DELIMITER //
 					SET MESSAGE_TEXT = 'The employee job not exists!!';
 				ELSE
 					-- Verify if employee restaurant exists
-					IF NOT EXISTS (SELECT 1 FROM restaurant WHERE restaurand_id = p_employee_restaurant) THEN
+					IF NOT EXISTS (SELECT 1 FROM restaurant WHERE restaurant_id = p_employee_restaurant) THEN
 						SIGNAL SQLSTATE '45000' 
 						SET MESSAGE_TEXT = 'The employee restaurant not exists!!';
 					ELSE
@@ -81,7 +80,7 @@ DELIMITER //
 			END IF;
 		ELSE
 			SIGNAL SQLSTATE '45000' 
-			SET MESSAGE_TEXT = 'The employee dpi already exists in the client table!!';
+			SET MESSAGE_TEXT = 'The employee dpi already exists in the employee table!!';
 		END IF;
 	END;
 //
@@ -102,14 +101,19 @@ DELIMITER //
 		IN parameter_salary DECIMAL(10,2)
 	)
 	BEGIN
-		-- Verify if job name exists
-		IF NOT EXISTS (SELECT 1 FROM job WHERE name = parameter_name) THEN
-			-- Insert a new job
-			INSERT INTO job (name, description, salary)
-			VALUES (parameter_name, parameter_description, parameter_salary);
+		IF parameter_salary <= 0  THEN
+				SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'Job Salary must be a positive integer';
 		ELSE
-			SIGNAL SQLSTATE '45000' 
-			SET MESSAGE_TEXT = 'The job name already exists in the job table';
+			-- Verify if job name exists
+			IF NOT EXISTS (SELECT 1 FROM job WHERE name = parameter_name) THEN
+				-- Insert a new job
+				INSERT INTO job (name, description, salary)
+				VALUES (parameter_name, parameter_description, parameter_salary);
+			ELSE
+				SIGNAL SQLSTATE '45000' 
+				SET MESSAGE_TEXT = 'The job name already exists in the job table';
+			END IF;
 		END IF;
 	END;
 //
@@ -226,7 +230,7 @@ DELIMITER //
 					-- If the address does not apply in the registered coverage of restaurants
 					IF v_result = FALSE THEN
 						-- Insert a new order with "Sin Cobertura" status
-						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
+						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__status_int,order__client_dpi,
 						order__client_address,order__channel,order__restaurant_id,order__employee_id,order__payment_method)
 						VALUES (NOW(),NULL,'SIN COBERTURA',-1,p_order_dpi,p_order_address_id,p_order_channel,NULL,NULL,NULL);
 						SIGNAL SQLSTATE '45000'
@@ -235,7 +239,7 @@ DELIMITER //
 						-- function to return the coverage restaurant id
 						SET restaurand_id = return_coverage_restaurant_id(p_order_address_id);
 						-- Insert a new order
-						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__client_dpi,
+						INSERT INTO order_ (order__start_date, order__end_date, order__status, order__status_int,order__client_dpi,
 						order__client_address,order__channel,order__restaurant_id,order__employee_id,order__payment_method)
 						VALUES (NOW(),NULL,'INICIADA',1,p_order_dpi,p_order_address_id,p_order_channel,restaurand_id,NULL,NULL);
 					END IF;
@@ -267,7 +271,7 @@ DELIMITER //
 		DECLARE order_status VARCHAR(50);
 		DECLARE product_price DECIMAL(10,2);
 		-- If order id not exists
-		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int = 1) THEN
+		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND (order__status_int = 1 OR order__status_int=2)) THEN
 			SIGNAL SQLSTATE '45000' 
 			SET MESSAGE_TEXT = 'The order id does not exist, or has a status of non-coverage.!!';
 		ELSE
@@ -293,7 +297,7 @@ DELIMITER //
 						-- function to return the order status
 						SET order_status = return_order_status(p_order_id);
 						IF order_status = 'INICIADA' THEN
-							--Update the order status
+							-- Update the order status
 							CALL update_order_status(p_order_id,'AGREGANDO',2);
 						END IF;
 						-- Insert a new order_product detail
@@ -345,7 +349,7 @@ DELIMITER //
 					SIGNAL SQLSTATE '45000'
 					SET MESSAGE_TEXT = 'The payment method must be single character strings of specific values (E/T) !!';
 				ELSE
-					--Update the order status
+					-- Update the order status
 					CALL update_order_status(p_order_id,'EN CAMINO',3);
 					-- Update order employee and payment method
 					CALL update_order_employee(p_order_id,p_employee_id,p_payment_method);

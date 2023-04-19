@@ -108,7 +108,7 @@ DELIMITER //
   SELECT product_price INTO product_price_result
     FROM product
     WHERE product_type = p_product_type
-    AND product_number = p_product_number
+    AND product_number = p_product_number;
   -- Return the product_price
   RETURN product_price_result;
   END//
@@ -211,8 +211,9 @@ DELIMITER ;
 DELIMITER //
 
 CREATE FUNCTION calculate_order_total(
-  IN p_order_product_id INT)
+  p_order_product_id INT)
   RETURNS DECIMAL(10, 2)
+  READS SQL DATA
   BEGIN
     DECLARE total DECIMAL(10, 2);
     DECLARE taxes DECIMAL(10, 2);
@@ -246,11 +247,11 @@ DELIMITER //
     FROM client
     WHERE client_dpi = p_client_dpi;
   -- If client nit is null
-  IF v_restaurant_id IS NOT NULL THEN
+  IF client_nit_result IS NULL THEN
     -- Return the client nit
     RETURN 'C/F';
   ELSE
-    RETURN CAST(client_nit_result AS VARCHAR(20));
+    RETURN client_nit_result;
   END IF;
   END//
 DELIMITER ;
