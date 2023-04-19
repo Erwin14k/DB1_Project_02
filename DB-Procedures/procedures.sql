@@ -398,3 +398,167 @@ DELIMITER;
 
 -- Delete the FinalizarOrden procedure
 DROP PROCEDURE IF EXISTS FinalizarOrden;
+
+
+
+
+
+
+
+
+-- ================================== REPORT# 01 List Restaurants ==================================
+DELIMITER //
+CREATE PROCEDURE ListarRestaurantes()
+BEGIN
+  SELECT
+    restaurant_id,
+    restaurant_address,
+    restaurant_municipality,
+    restaurant_zone,
+    restaurant_phone,
+    restaurant_staff,
+    CASE restaurant_parking
+      WHEN 1 THEN 'si'
+      ELSE 'no'
+    END AS restaurant_parking
+  FROM restaurant;
+END//
+DELIMITER ;
+
+-- Delete the ListarRestaurantes procedure
+DROP PROCEDURE IF EXISTS ListarRestaurantes;
+
+
+-- ================================== REPORT# 02 Consult Employee ==================================
+DELIMITER //
+	CREATE PROCEDURE ConsultarEmpleado(
+		IN p_employee_id INT
+	)
+	BEGIN
+		DECLARE job_name VARCHAR(50);
+		DECLARE job_salary DECIMAL(10,2);
+		DECLARE job_id INT;
+		-- Verify if employee id exists
+		IF NOT EXISTS (SELECT 1 FROM employee WHERE employee_id = p_employee_id) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The employee id not exists in the employee table!!';
+		ELSE
+			SET job_id=return_job_id(p_employee_id);
+			SET job_name=return_job_name(job_id);
+			SET job_salary=return_job_salary(job_id);
+
+			SELECT LPAD(employee_id, 8, '0') AS id,
+				CONCAT(employee_name, ' ', employee_surname) AS name,
+        employee_birthdate,
+        employee_email,
+        employee_phone,
+        employee_address,
+        employee_dpi,
+        job_name,
+        employee_start_date,
+        job_salary
+			FROM employee
+			WHERE employee_id  = p_employee_id;
+		END IF;
+	END;
+//
+DELIMITER;
+
+
+-- Delete the ConsultarEmpleado procedure
+DROP PROCEDURE IF EXISTS ConsultarEmpleado;
+
+
+
+-- ================================== REPORT# 03 Consult Client Order ==================================
+DELIMITER //
+	CREATE PROCEDURE ConsultarPedidosCliente(
+		IN p_order_id INT
+	)
+	BEGIN
+		-- Verify if order id exists
+		IF NOT EXISTS (SELECT 1 FROM order_ WHERE order__id = p_order_id AND order__status_int != -1) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The order not exists or has a not coverage status!!';
+		ELSE
+
+			SELECT
+				return_product_name(order_product_ptype,order_product_pnumber) AS name,
+				CASE order_product_ptype
+					WHEN 'C' THEN 'Combo'
+					WHEN 'B' THEN 'Bebida'
+					WHEN 'P' THEN 'Postre'
+					ELSE 'Extra'
+				END AS order_product_ptype,
+				order_product_price,
+				order_product_ammount,
+				order_product_observation
+			FROM order_product
+			WHERE order_product_orderid=p_order_id;
+		END IF;
+	END;
+//
+DELIMITER;
+
+
+-- Delete the ConsultarPedidosCliente procedure
+DROP PROCEDURE IF EXISTS ConsultarPedidosCliente;
+
+-- ================================== REPORT# 04 Client Orders ==================================
+DELIMITER //
+	CREATE PROCEDURE ConsultarHistorialOrdenes(
+		IN p_client_dpi BIGINT
+	)
+	BEGIN
+		-- Verify if client dpi exists
+		IF NOT EXISTS (SELECT 1 FROM client WHERE client_dpi = p_client_dpi) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The client dpi not exists in the client table!!';
+		ELSE
+			SELECT order__id,
+				order__start_date,
+				COALESCE(calculate_order_total(order__id), 'N/A') AS total,
+				COALESCE(order__restaurant_id, 'N/A') AS restaurant_id,
+				COALESCE(return_employee_name(order__employee_id), 'N/A') AS employee,
+				order__client_address,
+				CASE order__channel
+						WHEN 'L' THEN 'Llamada'
+						ELSE 'Aplicacion'
+						END AS order__channel,
+				order__status
+			FROM order_
+			WHERE order__client_dpi  = p_client_dpi;
+		END IF;
+	END;
+//
+DELIMITER;
+
+
+-- Delete the ConsultarHistorialOrdenes procedure
+DROP PROCEDURE IF EXISTS ConsultarHistorialOrdenes;
+
+
+-- ================================== REPORT# 05 Client Addresses ==================================
+DELIMITER //
+	CREATE PROCEDURE ConsultarDirecciones(
+		IN p_client_dpi BIGINT
+	)
+	BEGIN
+		-- Verify if client dpi exists
+		IF NOT EXISTS (SELECT 1 FROM client WHERE client_dpi = p_client_dpi) THEN
+			SIGNAL SQLSTATE '45000' 
+			SET MESSAGE_TEXT = 'The client dpi not exists in the client table!!';
+		ELSE
+			SELECT address,
+			municipality,
+			zone
+			FROM client_address
+			WHERE client_dpi  = p_client_dpi;
+		END IF;
+	END;
+//
+DELIMITER;
+
+
+-- Delete the ConsultarDirecciones procedure
+DROP PROCEDURE IF EXISTS ConsultarDirecciones;

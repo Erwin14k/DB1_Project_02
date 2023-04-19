@@ -115,6 +115,28 @@ DELIMITER //
 DELIMITER ;
 
 
+-- Function to return the product name 
+DELIMITER //
+  CREATE FUNCTION return_product_name(
+    p_product_type CHAR,
+    p_product_number INT
+  )
+  RETURNS VARCHAR(50)
+  READS SQL DATA
+  BEGIN
+	DECLARE product_name_result VARCHAR(50);
+  -- obtain the product name
+  SELECT product_name INTO product_name_result
+    FROM product
+    WHERE product_type = p_product_type
+    AND product_number = p_product_number;
+  -- Return the product_name
+  RETURN product_name_result;
+  END//
+DELIMITER ;
+
+
+
 
 
 -- Function to return the order status
@@ -220,7 +242,7 @@ CREATE FUNCTION calculate_order_total(
     -- Calculate the total accumulated.
     SELECT SUM(order_product_ammount * order_product_price) INTO total
     FROM order_product
-    WHERE order_product_id = p_order_product_id;
+    WHERE order_product_orderid = p_order_product_id;
     -- Calculate the taxes
     SET taxes = total * 0.12;
     -- Set the total
@@ -271,5 +293,80 @@ DELIMITER //
     FROM client_address
     WHERE client_address_id = p_client_address_id;
   RETURN client_address_municipality;
+  END//
+DELIMITER ;
+
+
+-- Function to return the job name 
+DELIMITER //
+  CREATE FUNCTION return_job_name(
+    p_job_id INT
+  )
+  RETURNS VARCHAR(50)
+  READS SQL DATA
+  BEGIN
+	DECLARE job_name_result VARCHAR(50);
+  -- obtain the job name
+  SELECT name INTO job_name_result
+    FROM job
+    WHERE p_job_id = job_id;
+  -- Return the job name
+  RETURN job_name_result;
+  END//
+DELIMITER ;
+
+
+-- Function to return the job salary 
+DELIMITER //
+  CREATE FUNCTION return_job_salary(
+    p_job_id INT
+  )
+  RETURNS DECIMAL(10,2)
+  READS SQL DATA
+  BEGIN
+	DECLARE job_salary_result DECIMAL(10,2);
+  -- obtain the job salary
+  SELECT salary INTO job_salary_result
+    FROM job
+    WHERE p_job_id = job_id;
+  -- Return the job salary
+  RETURN job_salary_result;
+  END//
+DELIMITER ;
+
+
+-- Function to return the job id 
+DELIMITER //
+  CREATE FUNCTION return_job_id(
+    p_employee_id INT
+  )
+  RETURNS INT
+  READS SQL DATA
+  BEGIN
+	DECLARE job_id_result DECIMAL(10,2);
+  -- obtain the job id
+  SELECT employee_job INTO job_id_result
+    FROM employee
+    WHERE p_employee_id = employee_id;
+  -- Return the job id
+  RETURN job_id_result;
+  END//
+DELIMITER ;
+
+-- Function to return the employee name 
+DELIMITER //
+  CREATE FUNCTION return_employee_name(
+    p_employee_id INT
+  )
+  RETURNS VARCHAR(50)
+  READS SQL DATA
+  BEGIN
+	DECLARE employee_name_result VARCHAR(50);
+  -- obtain the employee name
+  SELECT CONCAT(employee_name, ' ', employee_surname) INTO employee_name_result
+    FROM employee
+    WHERE p_employee_id = employee_id;
+  -- Return the employee name
+  RETURN employee_name_result;
   END//
 DELIMITER ;

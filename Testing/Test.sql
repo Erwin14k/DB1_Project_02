@@ -83,3 +83,31 @@ CALL ConfirmarOrden(3,'T',2); -- ok
 CALL FinalizarOrden(1); -- OK
 CALL FinalizarOrden(10); -- Error, orden inexistente
 CALL FinalizarOrden(2); -- OK
+
+
+-- ########################### REPORTE # 01 ###########################
+CALL ListarRestaurantes();
+
+-- ########################### REPORTE # 02 ###########################
+CALL ConsultarEmpleado(5); -- Error Empleado inexistente
+CALL ConsultarEmpleado(1); -- ok
+CALL ConsultarEmpleado(2); -- ok
+CALL ConsultarEmpleado(4); -- Error Empleado inexistente
+
+-- ########################### REPORTE # 03 ###########################
+CALL ConsultarPedidosCliente(1); -- ok
+CALL ConsultarPedidosCliente(2); -- Error, esta orden se quedo en estado de "SIN COBERTURA"
+CALL ConsultarPedidosCliente(3); -- ok
+CALL ConsultarPedidosCliente(4); -- Error, esta orden no existe
+
+-- ########################### REPORTE # 04 ###########################
+CALL ConsultarHistorialOrdenes(1234678909123); --ok
+CALL ConsultarHistorialOrdenes(44444444444444); -- Error, dpi inexistente
+CALL ConsultarHistorialOrdenes(1234678909097); -- ok
+
+-- ########################### REPORTE # 05 ###########################
+CALL ConsultarDirecciones(1234678909123); --ok
+CALL ConsultarDirecciones(44444444444444); -- Error, dpi inexistente
+CALL ConsultarDirecciones(1234678909097); -- ok
+
+-- ########################### REPORTE # 06 ###########################
