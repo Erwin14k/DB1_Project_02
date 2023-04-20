@@ -520,11 +520,11 @@ DELIMITER //
 				COALESCE(calculate_order_total(order__id), 'N/A') AS total,
 				COALESCE(order__restaurant_id, 'N/A') AS restaurant_id,
 				COALESCE(return_employee_name(order__employee_id), 'N/A') AS employee,
-				order__client_address,
+				COALESCE(return_client_address_address(order__client_address),'N/A') AS address,
 				CASE order__channel
-						WHEN 'L' THEN 'Llamada'
-						ELSE 'Aplicacion'
-						END AS order__channel,
+					WHEN 'L' THEN 'Llamada'
+					ELSE 'Aplicacion'
+				END AS order__channel,
 				order__status
 			FROM order_
 			WHERE order__client_dpi  = p_client_dpi;
@@ -562,3 +562,87 @@ DELIMITER;
 
 -- Delete the ConsultarDirecciones procedure
 DROP PROCEDURE IF EXISTS ConsultarDirecciones;
+
+
+-- ================================== REPORT# 06 Show Orders By Status ==================================
+DELIMITER //
+	CREATE PROCEDURE MostrarOrdenes(
+		IN p_order_status INT
+	)
+	BEGIN
+		SELECT
+			order__id,
+			order__status,
+			order__start_date,
+			order__client_dpi,
+			COALESCE(return_client_address_address(order__client_address),'N/A') AS address,
+			COALESCE(order__restaurant_id, 'N/A') AS restaurant_id,
+			CASE order__channel
+				WHEN 'L' THEN 'Llamada'
+				WHEN 'A' THEN 'Aplicacion'
+				ELSE 'N/A'
+			END AS order__channel
+		FROM order_
+		WHERE order__status_int=p_order_status;
+	END;
+//
+DELIMITER;
+
+-- Delete the MostrarOrdenes procedure
+DROP PROCEDURE IF EXISTS MostrarOrdenes;
+
+
+-- ================================== REPORT# 07 Consult Bills ==================================
+DELIMITER //
+	CREATE PROCEDURE ConsultarFacturas(
+		IN p_day INT,
+		IN p_month INT,
+		IN p_year INT
+	)
+	BEGIN
+		SELECT
+			bill_serial_number,
+			bill_total,
+			bill_place,
+			bill_date_time,
+			bill_order_id,
+			bill_client_nit,
+			CASE bill_payment_method
+				WHEN 'T' THEN 'Tarjeta'
+				WHEN 'E' THEN 'Efectivo'
+				ELSE 'N/A'
+			END AS bill_payment_method
+		FROM bill
+		WHERE DAY(bill_date_time) = p_day
+    AND MONTH(bill_date_time) = p_month
+    AND YEAR(bill_date_time) = p_year;
+	END;
+//
+DELIMITER;
+
+-- Delete the ConsultarFacturas procedure
+DROP PROCEDURE IF EXISTS ConsultarFacturas;
+
+
+-- ================================== REPORT# 08 Timeouts ==================================
+DELIMITER //
+	CREATE PROCEDURE ConsultarTiempos(
+		IN p_minutes INT
+	)
+	BEGIN
+		DECLARE minutes INT;
+		SELECT
+			order__id,
+			COALESCE(return_client_address_address(order__client_address),'N/A') AS address,
+			order__start_date,
+			calculate_order_timeout(order__id) AS minutes,
+			COALESCE(return_employee_name(order__employee_id), 'N/A') AS employee
+		FROM order_
+		WHERE order__end_date IS NOT NULL AND
+		TIMESTAMPDIFF(MINUTE, order__start_date,order__end_date ) >=p_minutes;
+	END;
+//
+DELIMITER;
+
+-- Delete the ConsultarTiempos procedure
+DROP PROCEDURE IF EXISTS ConsultarTiempos;

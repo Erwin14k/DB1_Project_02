@@ -101,7 +101,7 @@ CALL ConsultarPedidosCliente(3); -- ok
 CALL ConsultarPedidosCliente(4); -- Error, esta orden no existe
 
 -- ########################### REPORTE # 04 ###########################
-CALL ConsultarHistorialOrdenes(1234678909123); --ok
+CALL ConsultarHistorialOrdenes(1234678909123); -- ok
 CALL ConsultarHistorialOrdenes(44444444444444); -- Error, dpi inexistente
 CALL ConsultarHistorialOrdenes(1234678909097); -- ok
 
@@ -111,3 +111,19 @@ CALL ConsultarDirecciones(44444444444444); -- Error, dpi inexistente
 CALL ConsultarDirecciones(1234678909097); -- ok
 
 -- ########################### REPORTE # 06 ###########################
+CALL MostrarOrdenes(-1); -- Debería mostrar una orden sin cobertura
+CALL MostrarOrdenes(1); -- No debería mostrar nada
+CALL MostrarOrdenes(2); -- No debería mostrar nada
+CALL MostrarOrdenes(3); -- No debería mostrar nada
+CALL MostrarOrdenes(4); -- Debería mostrar 2 órdenes entregadas.
+
+-- ########################### REPORTE # 07 ###########################
+-- Editar las fechas según sea el caso de validación
+CALL ConsultarFacturas(19,04,2023);
+CALL ConsultarFacturas(29,04,2023);
+
+-- ########################### REPORTE # 08 ###########################
+-- Editar los minutos de parametro segun sea el caso de validación
+CALL ConsultarTiempos(3);
+CALL ConsultarTiempos(10);
+CALL ConsultarTiempos(1);

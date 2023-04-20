@@ -254,6 +254,26 @@ END //
 DELIMITER ;
 
 
+-- Function to return the order timeouts.
+DELIMITER //
+
+CREATE FUNCTION calculate_order_timeout(
+  p_order_id INT
+  )
+  RETURNS INT
+  READS SQL DATA
+  BEGIN
+    DECLARE minutes INT;
+    -- Calculate the ortder timeout.
+    SELECT IFNULL(TIMESTAMPDIFF(MINUTE, order__start_date, order__end_date), 0) INTO minutes
+    FROM order_
+    WHERE order__id = p_order_id;
+    
+    RETURN minutes;
+END //
+
+DELIMITER ;
+
 
 -- Function to return the client nit
 DELIMITER //
@@ -296,6 +316,23 @@ DELIMITER //
   END//
 DELIMITER ;
 
+
+-- Function to return the client_address address
+DELIMITER //
+  CREATE FUNCTION return_client_address_address(
+    p_client_address_id BIGINT
+  )
+  RETURNS VARCHAR(20)
+  READS SQL DATA
+  BEGIN
+	DECLARE client_address_address VARCHAR(100);
+  -- obtain the client address 
+  SELECT address INTO client_address_address
+    FROM client_address
+    WHERE client_address_id = p_client_address_id;
+  RETURN client_address_address;
+  END//
+DELIMITER ;
 
 -- Function to return the job name 
 DELIMITER //
