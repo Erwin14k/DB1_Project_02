@@ -49,8 +49,8 @@ DELIMITER //
 		IN p_employee_phone INT,
 		IN p_employee_address VARCHAR(100),
 		IN p_employee_dpi BIGINT,
-		IN p_employee_start_date DATE,
 		IN p_employee_job INT,
+		IN p_employee_start_date DATE,
 		IN p_employee_restaurant VARCHAR(100)
 		
 	)
@@ -600,10 +600,10 @@ DELIMITER //
 		IN p_year INT
 	)
 	BEGIN
-		SELECT
+		SELECT  
 			bill_serial_number,
 			bill_total,
-			bill_place,
+			return_client_address_address(bill_place) AS bill_place ,
 			bill_date_time,
 			bill_order_id,
 			bill_client_nit,

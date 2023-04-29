@@ -16,17 +16,17 @@ CALL RegistrarPuesto('Repartidor','Llevar pedidos a domicilio',3900.00); -- ok
 
 -- ########################### INGRESAR Empleados ###########################
 CALL CrearEmpleado('Harry','Maguire','1990-01-01','hola.com',12347890,'Zona 15',4567098710234,
-'2022-01-01',1,"R-01"); -- Correo invalido
+1,'2022-01-01',"R-01"); -- Correo invalido
 CALL CrearEmpleado('Harry','Maguire','1990-01-01','hola@gmail.com',12347890,'Zona 15',4567098710234,
-'2022-01-01',4,"R-01"); -- Error, puesto de trabajo inexistente
+4,'2022-01-01',"R-01"); -- Error, puesto de trabajo inexistente
 CALL CrearEmpleado('Harry','Maguire','1990-01-01','hola@gmail.com',12347890,'Zona 15',4567098710234,
-'2022-01-01',1,"R-02"); -- Error, restaurante inexistente
+1,'2022-01-01',"R-02"); -- Error, restaurante inexistente
 CALL CrearEmpleado('Harry','Maguire','1990-01-01','hola@gmail.com',12347890,'Zona 15',4567098710234,
-'2022-01-01',1,"R-01"); -- Ok
+1,'2022-01-01',"R-01"); -- Ok
 CALL CrearEmpleado('James','Hollywood','1990-01-01','aaa@hotmail.es',12347899,'Zona 15',4567098710234,
-'2022-01-01',1,"R-01"); -- Error, dpi duplicado
+1,'2022-01-01',"R-01"); -- Error, dpi duplicado
 CALL CrearEmpleado('James','Hollywood','1990-01-01','aaa@hotmail.es',12347899,'Zona 15',4567098710235,
-'2022-01-01',3,"R-01"); -- Ok
+3,'2022-01-01',"R-01"); -- Ok
 
 
 -- ########################### INGRESAR Clientes ###########################
@@ -64,11 +64,11 @@ CALL AgregarItem(1,'E',1,10,''); -- ok
 CALL AgregarItem(1,'B',1,10,''); -- ok
 CALL AgregarItem(1,'P',1,10,''); -- ok
 CALL AgregarItem(1,'P',19,10,''); -- Error, producto inexistente
-CALL AgregarItem(2,'P',19,10,''); -- Error, no se pueden agregar items a una orden sin cobertura
-CALL AgregarItem(2,'C',2,5,''); -- ok
-CALL AgregarItem(2,'E',2,5,''); -- ok
-CALL AgregarItem(2,'B',2,5,''); -- ok
-CALL AgregarItem(2,'P',2,5,''); -- ok
+CALL AgregarItem(3,'P',19,10,''); -- Error, no se pueden agregar items a una orden sin cobertura
+CALL AgregarItem(3,'C',2,5,''); -- ok
+CALL AgregarItem(3,'E',2,5,''); -- ok
+CALL AgregarItem(3,'B',2,5,''); -- ok
+CALL AgregarItem(3,'P',2,5,''); -- ok
 
 
 -- ########################### Confirmar ordenes ###########################
@@ -82,7 +82,7 @@ CALL ConfirmarOrden(3,'T',2); -- ok
 -- ########################### Finalizar Órdenes ###########################
 CALL FinalizarOrden(1); -- OK
 CALL FinalizarOrden(10); -- Error, orden inexistente
-CALL FinalizarOrden(2); -- OK
+CALL FinalizarOrden(3); -- OK
 
 
 -- ########################### REPORTE # 01 ###########################

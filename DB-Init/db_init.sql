@@ -24,6 +24,7 @@ TRUNCATE TABLE job;
 TRUNCATE TABLE client;
 TRUNCATE TABLE client_address;
 TRUNCATE TABLE bill;
+TRUNCATE TABLE trigger_list;
 
 -- Drop Tables
 DROP TABLE restaurant ;
@@ -35,6 +36,7 @@ DROP TABLE job;
 DROP TABLE client;
 DROP TABLE client_address;
 DROP TABLE bill;
+DROP TABLE trigger_list;
 
 -- Select * From Tables
 SELECT * FROM  restaurant ;
@@ -46,6 +48,7 @@ SELECT * FROM  job;
 SELECT * FROM client;
 SELECT * FROM  client_address;
 SELECT * FROM  bill;
+SELECT * FROM trigger_list;
 
 
 
@@ -164,6 +167,17 @@ CREATE TABLE IF NOT EXISTS bill(
 );
 
 
+
+-- triggers table
+CREATE TABLE IF NOT EXISTS trigger_list(
+  trigger_id INT PRIMARY KEY AUTO_INCREMENT,
+  trigger_date DATETIME NOT NULL,
+  trigger_description VARCHAR(150) NOT NULL,
+  trigger_type VARCHAR(50) NOT NULL
+);
+
+
+-- Products Avaliable
 INSERT INTO product (product_id,product_type, product_number, product_name, product_price) VALUES
 ('C1', 'C', 1, 'Cheeseburger',41.00),
 ('C2', 'C', 2, 'Chicken Sandwinch',32.00),
@@ -183,3 +197,113 @@ INSERT INTO product (product_id,product_type, product_number, product_name, prod
 ('P2', 'P', 2, 'Cheesecake',15.00),
 ('P3', 'P', 3, 'Cupcake de chocolate',8.00),
 ('P4', 'P', 4, 'Flan',10.00);
+
+
+-- Triggers
+-- Create Trigger for Job table
+CREATE TRIGGER job_trigger AFTER INSERT ON job
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('New record inserted into job table with ID: ', NEW.job_id), 'INSERT');
+-- Update Trigger for Job table
+CREATE TRIGGER job_trigger_update AFTER UPDATE ON job
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('Record with ID: ', NEW.job_id, ' updated in job table'), 'UPDATE');
+
+
+-- Create Trigger for Restaurant table
+CREATE TRIGGER restaurant_trigger AFTER INSERT ON restaurant
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('New record inserted into restaurant table with ID: ', NEW.restaurant_id), 'INSERT');
+-- Update Trigger for Restaurant table
+CREATE TRIGGER restaurant_trigger_update AFTER UPDATE ON restaurant
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('Record with ID: ', NEW.restaurant_id, ' updated in restaurant table'), 'UPDATE');
+
+
+-- Create Trigger for Employee table
+CREATE TRIGGER employee_trigger AFTER INSERT ON employee
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('New record inserted into employee table with ID: ', NEW.employee_id), 'INSERT');
+-- Update Trigger for Employee table
+CREATE TRIGGER employee_trigger_update AFTER UPDATE ON employee
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('Record with ID: ', NEW.employee_id, ' updated in employee table'), 'UPDATE');
+
+
+-- Create Trigger for Client table
+CREATE TRIGGER client_trigger AFTER INSERT ON client
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('New record inserted into client table with ID: ', NEW.client_dpi), 'INSERT');
+-- Update Trigger for Client table
+CREATE TRIGGER client_trigger_update AFTER UPDATE ON client
+  FOR EACH ROW
+  INSERT INTO trigger_list(trigger_date, trigger_description, trigger_type) 
+  VALUES (NOW(), CONCAT('Record with ID: ', NEW.client_dpi, ' updated in client table'), 'UPDATE');
+
+
+-- Create Trigger for Client_Adress table
+CREATE TRIGGER client_address_trigger AFTER INSERT ON client_address
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('New client address inserted with id ', NEW.client_address_id), 'INSERT');
+-- Update Trigger for Client_Adress table
+CREATE TRIGGER client_address_update_trigger AFTER UPDATE ON client_address
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('Client address with id ', NEW.client_address_id, ' updated'), 'UPDATE');
+
+
+-- Create Trigger for product table
+CREATE TRIGGER product_trigger AFTER INSERT ON product
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('New product inserted with id ', NEW.product_id), 'INSERT');
+-- Update Trigger for product table
+CREATE TRIGGER product_update_trigger AFTER UPDATE ON product
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('Product with id ', NEW.product_id, ' updated'), 'UPDATE');
+
+
+-- Create Trigger for order_ table
+CREATE TRIGGER order_trigger AFTER INSERT ON order_
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('New order inserted with id ', NEW.order__id), 'INSERT');
+-- Update Trigger for order_ table
+CREATE TRIGGER order_update_trigger AFTER UPDATE ON order_
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('Order with id ', NEW.order__id, ' updated'), 'UPDATE');
+
+
+-- Create Trigger for Order_Product table
+CREATE TRIGGER order_product_trigger AFTER INSERT ON order_product
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('New order product inserted with id ', NEW.order_product_id), 'INSERT');
+-- Create Trigger for Order_Product table
+CREATE TRIGGER order_product_update_trigger AFTER UPDATE ON order_product
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('Order product with id ', NEW.order_product_id, ' updated'), 'UPDATE');
+
+
+-- Create Trigger for Bill table
+CREATE TRIGGER bill_trigger AFTER INSERT ON bill
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('New bill inserted with serial number ', NEW.bill_serial_number), 'INSERT');
+-- Create Trigger for Bill table
+CREATE TRIGGER bill_update_trigger AFTER UPDATE ON bill
+  FOR EACH ROW
+  INSERT INTO trigger_list (trigger_date, trigger_description, trigger_type)
+  VALUES (NOW(), CONCAT('Bill with serial number ', NEW.bill_serial_number, ' updated'), 'UPDATE');
+
